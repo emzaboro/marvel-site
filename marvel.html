@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HTML 5 Boilerplate</title>
+    <link rel="stylesheet" href="/css/marvel.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.typekit.net/nyd5ydj.css">
+</head>
+
+  <body>
+    <div class="page-wrapper">
+        <main class="main-wrapper">
+
+            <!-- Start Nav Section-->
+
+            <nav class="section_nav global-padding padding-section-m"> 
+                <div class="nav_contain u-contain-l">
+                    <div class="nav_component">
+                        <ul class="nav_list is--nav_list1">
+                            <li class="nav_item"><a href="#">Heros</a></li>
+                            <li class="nav_item"><a href="#">Villians</a></li>
+                        </ul>
+                        <div class="nav_logo">
+                            <img src="/img/marvel-logo.png">
+                        </div>
+                        <ul class="nav_list is--nav_list2">
+                            <li class="nav_item"><a href="#">X-Men</a></li>
+                            <li class="nav_item"><a href="#">Avengers</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- End Nav Section-->
+
+            <!-- Start Hero Section-->
+
+            <section class="section_hero global-padding">
+                <div class="hero_contain u-contain-l is--round-corners">
+                    <figure>
+                        <img class="marvel-hero_img" src="/img/comic-hero.webp" alt="marvel comic book">
+                    </figure>
+                    <div class="marvel-hero_component is--white-font">
+                        <h4 class="subheading">Marvel Universe</h4>
+                        <h1 class="font-style-h1">Marvel superheroes</h1>
+                         <p>Here is a list of superheroes</p>
+                         <a href="#" class="btn-primary">Learn more</a>
+                    </div>
+                </div>
+            </section>
+            <!-- End Hero Section-->
+            
+            <!-- Start Character Section-->
+
+            <section class="section_character global-padding padding-section-m">
+                <div class="container_character u-contain-s">
+                    <form id="character-form">
+                        <label for="character-input" class="font-style-h2" id="character-label">What's your favorite Marvel Superhero?</label>
+                        <input type="text" id="character-input" name="character-name" placeholder="e.g. Hulk" required />
+                        <button type="submit" id="character-submit">Search</button>
+                    </form>
+                    <div class="character_component">
+                        <h2 id="character-name" class="font-style-h2"></h2>
+                        <p id="character-description"></p>
+                        <img id="character-image" src="" alt="" style="max-width: 300px;">
+                      </div>
+                </div>
+            </section>
+            <!-- End Character Section-->
+
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        const publicKey = "0e695b539c9633587c4e544807cf7721";
+        const privateKey = "8efb7c121a5657cc3d7b444122366d64245c85e4";
+      
+        document.getElementById("character-form").addEventListener("submit", function (e) {
+          e.preventDefault(); // Stop form from reloading page
+      
+          const characterInput = document.getElementById("character-input").value.trim();
+          if (!characterInput) return;
+      
+          const ts = new Date().getTime().toString();
+          const hash = CryptoJS.MD5(ts + privateKey + publicKey).toString();
+      
+          const url = `https://gateway.marvel.com/v1/public/characters?name=${encodeURIComponent(characterInput)}&ts=${ts}&apikey=${publicKey}&hash=${hash}`;
+      
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              const character = data.data.results[0];
+                if (!character) {
+                    document.getElementById("character-name").textContent = "Character not found.";
+                    document.getElementById("character-description").textContent = "";
+                    document.getElementById("character-image").style.display = "none";
+                    return;
+                }
+                    // Fill in existing HTML elements
+                    document.getElementById("character-name").textContent = character.name;
+                    document.getElementById("character-description").textContent = character.description || "No description available.";
+                    document.getElementById("character-image").src = `${character.thumbnail.path}.${character.thumbnail.extension}`;
+                    document.getElementById("character-image").alt = character.name;
+                    document.getElementById("character-image").style.display = "block";
+                })
+                .catch(error => {
+                    console.error("Marvel API error:", error);
+                    document.getElementById("character-name").textContent = "Error loading character.";
+                });
+        });
+      </script>
+
+  </body>
+</html>
